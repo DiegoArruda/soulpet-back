@@ -12,7 +12,7 @@ const Produto = connection.define("produto", {
         allowNull: false
     },
     preco: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     descricao: {
@@ -25,12 +25,14 @@ const Produto = connection.define("produto", {
     },
     dataDesconto: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
     },
     categoria: {
         type: DataTypes.STRING(20),
         allowNull: false
     }
 });
+
+
 
 module.exports = Produto;
