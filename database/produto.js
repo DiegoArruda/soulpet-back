@@ -26,21 +26,12 @@ const Produto = connection.define("produto", {
     dataDesconto: {
         type: DataTypes.DATEONLY,
         allowNull: false,
-        // validate: [validateDataDesconto, {message: "Data de desconto inválida"}]
     },
     categoria: {
         type: DataTypes.STRING(20),
         allowNull: false
     }
 });
-
-// // Validação da data do desconto (não pode ser anterior ao dia atual)
-// function validateDataDesconto(value){
-//     const hoje = new Date();
-//     const dataDesconto = new Date(value);
-//     return dataDesconto >= hoje;
-// }
-
 
 
 
