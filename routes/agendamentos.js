@@ -32,7 +32,7 @@ router.post("/agendamentos", async (req, res) => {
         message: "Agendamento criado com sucesso",
         agendamento: agendamento,
       });
-    }
+    } else res.status(404).json({ message: "Pet ou Serviço não encontrado" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

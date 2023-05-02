@@ -5,13 +5,19 @@ const Produto = require("./produto");
 
 const Pedidos = connection.define("pedido", {
     codigo: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
+        allowNull: false,
         primaryKey: true,
-        autoIncrement: true
+        validate: {
+            notEmpty: true,
+        }
     },
     quantidade: {
-        type: DataTypes.DOUBLE,
-        allowNull: false
+        type: DataTypes.STRING(100),
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+        }
     }
 })
 
