@@ -5,7 +5,7 @@ const Produto = require("../database/produto");
 const { Router } = require("express");
 
 const router = Router();
-
+//
 // Rota para listar todos os pedidos
 router.get("/pedidos", async (req, res) => {
   const listaPedidos = await Pedidos.findAll({

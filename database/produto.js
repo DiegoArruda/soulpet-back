@@ -5,7 +5,7 @@
 
 const { DataTypes } = require("sequelize");
 const { connection } = require("./database");
-//
+
 const Produto = connection.define("produto", {
     nome: {
         type: DataTypes.STRING(100),
