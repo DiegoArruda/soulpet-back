@@ -1,116 +1,105 @@
-const Pedidos = require("../database/pedidos");
-const Cliente = require("../database/cliente");
 const Produto = require("../database/produto");
+const Cliente = require("../database/cliente");
+const Pedido = require("../database/pedido");
 
 const { Router } = require("express");
 
+// Criar o grupo de rotas (/pedidos)
 const router = Router();
-//
-// Rota para listar todos os pedidos
-router.get("/pedidos", async (req, res) => {
-  const listaPedidos = await Pedidos.findAll({
-    include: [Cliente, Produto], // traz junto os dados de cliente e produto
-  });
-  res.json(listaPedidos);
-});
 
-// Rota para mostrar um pedido específico
-router.get("/pedidos/:codigo", async (req, res) => {
-  const { codigo } = req.params;
+router.post("/pedidos", async (req, res) => {
+    const { codigo, quantidade, clienteId, produtoId} = req.body;
   
-    const pedidoId = await Pedidos.findByPk(codigo, {include: [Cliente, Produto]});
+    try {
+      const cliente = await Cliente.findByPk(clienteId);
+      if (cliente) {
+        const pet = await Pedido.create({ codigo, quantidade, clienteId, produtoId});
+        res.status(201).json(pet);
+      } else {
+        res.status(404).json({ message: "Cliente não encontrado." });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Um erro aconteceu." });
+    }
+  });
+
+  router.get("/pedidos", async (req, res) => {
+    const listaPedidos = await Pedido.findAll( {include: [Cliente, Produto]});
+    res.json(listaPedidos);
+  });
+  
+  router.get("/pedidos/:codigo", async (req, res) => {
+    const { codigo } = req.params;
+  
+    const pedidoId = await Pedido.findByPk(codigo, {include: [Cliente, Produto]});
     if (pedidoId) {
       res.json(pedidoId);
     } else {
-      res.status(404).json({ message: "Pet não encontrado." });
+      res.status(404).json({ message: "Pedido não encontrado." });
     }
-});
-
-// Rota para mostrar um pedido de acordo com o id do produto fornecido
-router.get("/pedidos/produtos/:id", async (req, res) => {
-  const id = req.params.id;
-  const produtoeCliente = await Pedidos.findAll({
-    include: [
-      {
-        model: Produto,
-        where: { id: id },
-      },
-      {
-        model: Cliente,
-      },
-    ],
   });
-  if (produtoeCliente)
-  {
-    res.json(produtoeCliente)
-  }
-  else {
-    res.json({ error})
-  }
-});
-
-// Rota para mostrar um pedido de acordo com o id do cliente fornecido
-router.get('/pedidos/clientes/:id', async (req, res) => {
-  const id = req.params.id;
-  const pedidos = await Pedidos.findAll({
-    where: { ClienteId: id },
-    include: [Produto],
-  });
-
-  if (pedidos) {
-    res.json(pedidos)
-  }
-  else {
-    res.json({error})
-  }
-
-});
-
-router.post("/pedidos", async (req, res) => {
-  const {codigo, quantidade, clienteId, produtoId} = req.body;
-
-  try {
-    const cliente = await Cliente.findByPk(clienteId);
-    const produto = await Produto.findByPk(produtoId);
-    if (cliente && produto) {
-      const pedido = await Pedidos.create({ codigo, quantidade, clienteId, produtoId});
-      res.status(201).json(pedido);
-    } else {
-      res.status(404).json({ message: "Cliente ou Produto não encontrado." });
+  
+  router.get("/pedidos/produtos/:id", async (req, res) => {
+    const id = req.params.id;
+    const produtoeCliente = await Pedido.findAll({
+      include: [
+        {
+          model: Produto,
+          where: { id: id },
+        },
+        {
+          model: Cliente,
+        },
+      ],
+    });
+    if (produtoeCliente)
+    {
+      res.json(produtoeCliente)
     }
+    else {
+      res.json({ error})
+    }
+  });
+  
+  router.get('/pedidos/clientes/:id', async (req, res) => {
+    const id = req.params.id;
+    const pedidos = await Pedido.findAll({
+      where: { ClienteId: id },
+      include: [Produto],
+    });
+  
+    if (pedidos) {
+      res.json(pedidos)
+    }
+    else {
+      res.json({error})
+    }
+  
+  });
 
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
-  }
-})
-
-router.put('/pedidos/:id', async (req, res) => {
-  try {
-    const pedidoAtualizado = req.body;
-    const pedidoId = req.params.id;
-
-    // Busca o pedido no banco de dados
-    const pedido = await Pedidos.findByPk(pedidoId);
-
-    // Verifica se o pedido existe
+  router.put('/pedidos/:codigo', async (req, res) => {
+    const codigo = req.params.codigo;
+    const pedido = await Pedido.findByPk(codigo);
+  
     if (!pedido) {
-      return res.status(404).json({ message: 'Pedido não encontrado' });
+      return res.status(404).send('Pedido não encontrado');
     }
+  
+    const { quantidade, clienteId, produtoId } = req.body;
+  
+    if (!quantidade || !clienteId || !produtoId) {
+      return res.status(400).send('Campos inválidos');
+    }
+  
+    try {
+      await pedido.update({ quantidade, clienteId, produtoId });
+  
+      res.send(pedido);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Erro ao atualizar pedido');
+    }
+  });
 
-    // Atualiza o pedido com os novos valores
-    pedido.produto = pedidoAtualizado.produto || pedido.produto;
-    pedido.quantidade = pedidoAtualizado.quantidade || pedido.quantidade;
-    pedido.valor_unitario = pedidoAtualizado.valor_unitario || pedido.valor_unitario;
-
-    // Salva as mudanças no banco de dados
-    await pedido.save();
-
-    res.status(200).json(pedido);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao atualizar pedido' });
-  }
-});
-
-module.exports = router;
+  module.exports = router;
