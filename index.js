@@ -6,7 +6,6 @@ const morgan = require("morgan");
 
 // Configuração do App
 const app = express();
-const session = require("express-session");
 const compression = require("compression");
 app.use(express.json()); // Possibilitar transitar dados usando JSON
 app.use(morgan("tiny"));
@@ -16,7 +15,16 @@ app.use(compression()); //Compactação gzip
 const helmet = require("helmet");
 app.use(helmet());
 app.disable("x-powered-by");
-app.set("trust proxy", 1); // trust first proxy
+
+//Configuração de cookies
+const session = require("express-session");
+app.set("trust proxy", 1);
+app.use(
+  session({
+    secret: "s3Cur3",
+    name: "sessionId",
+  })
+);
 
 // Configurações de acesso
 app.use(cors({ origin: "http://localhost:3000" }));
