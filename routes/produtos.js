@@ -46,7 +46,6 @@ router.post("/produtos", async (req, res) => {
 });
 
 // // GET
-
 router.get("/produtos", async (req, res) => {
   const nome = req.query.nome;
   const categoria = req.query.categoria;
@@ -79,6 +78,27 @@ router.get("/produtos/:id", async (req, res) => {
   }
 });
 
+// DELETE
 
+router.delete("/produtos/:id", async (req, res) => {
+  // Precisamos checar se o produto existe antes de apagar
+  const produto = await Produto.findByPk(req.params.id);
+
+  try {
+
+      if (produto) {
+          // produto existe, podemos apagar
+          await produto.destroy();
+          res.json({ message: "O produto foi removido." });
+      } else {
+          res.status(404).json({ message: "O produto não foi encontrado" });
+      }
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Um erro aconteceu." });
+  }
+
+
+});
 
 module.exports = router;
