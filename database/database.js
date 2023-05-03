@@ -20,10 +20,10 @@ async function authenticate(connection) {
   try {
     // Tentar estabelecer conexão (usar as informações passadas acima)
     await connection.authenticate();
-    console.log("Conexão estabelecida com sucesso!");
+    /* console.log("Conexão estabelecida com sucesso!"); */
   } catch (err) {
     // err = objeto que guarda detalhes sobre o erro que aconteceu
-    console.log("Um erro inesperado aconteceu: ", err);
+    /* console.log("Um erro inesperado aconteceu: ", err); */
   }
 }
 

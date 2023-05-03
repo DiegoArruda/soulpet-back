@@ -6,8 +6,17 @@ const morgan = require("morgan");
 
 // Configuração do App
 const app = express();
+const session = require("express-session");
+const compression = require("compression");
 app.use(express.json()); // Possibilitar transitar dados usando JSON
-app.use(morgan("dev"));
+app.use(morgan("tiny"));
+app.use(compression()); //Compactação gzip
+
+//Configuração Helmet
+const helmet = require("helmet");
+app.use(helmet());
+app.disable("x-powered-by");
+app.set("trust proxy", 1); // trust first proxy
 
 // Configurações de acesso
 app.use(cors({ origin: "http://localhost:3000" }));
@@ -31,11 +40,11 @@ app.use(rotasServicos);
 app.use(rotasProdutos);
 app.use(rotasAgendamentos);
 app.use(rotasPedidos);
+app.use("/healthcheck", require("./routes/healthchecker"));
 
 // Escuta de eventos (listen)
 app.listen(3001, () => {
   // Gerar as tabelas a partir do model
   // Force = apaga tudo e recria as tabelas
   connection.sync();
-  console.log("Servidor rodando em http://localhost:3001/");
 });
