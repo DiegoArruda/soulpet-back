@@ -79,13 +79,10 @@ router.get("/produtos/:id", async (req, res) => {
 });
 
 // DELETE
-
 router.delete("/produtos/:id", async (req, res) => {
   // Precisamos checar se o produto existe antes de apagar
   const produto = await Produto.findByPk(req.params.id);
-
   try {
-
       if (produto) {
           // produto existe, podemos apagar
           await produto.destroy();
@@ -97,8 +94,6 @@ router.delete("/produtos/:id", async (req, res) => {
       console.error(err);
       res.status(500).json({ message: "Um erro aconteceu." });
   }
-
-
 });
 
 module.exports = router;
