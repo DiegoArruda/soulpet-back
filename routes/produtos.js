@@ -1,4 +1,5 @@
 // Importação das variáveis
+const { Op } = require("sequelize");
 const Produto = require("../database/produto");
 const { Router } = require("express");
 
@@ -44,56 +45,40 @@ router.post("/produtos", async (req, res) => {
     }
 });
 
-// GET (todos produtos)
+// // GET
+
 router.get("/produtos", async (req, res) => {
-    const produtos = await Produto.findAll();
-    res.json(produtos);
+  const nome = req.query.nome;
+  const categoria = req.query.categoria;
+  
+  const whereClause = {};
+  if (nome) {
+    whereClause.nome = {[Op.like]: `%${nome}%`};
+  }
+  if (categoria) {
+    whereClause.categoria = {[Op.eq]: categoria};
+  }
+
+  const listaProdutos = await Produto.findAll({where: whereClause});
+  res.json(listaProdutos);
 });
 
 // GET BY ID (busca pelo id do produto)
 router.get("/produtos/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const produto = await Produto.findByPk(id);
-        if(produto) {
-            res.json(produto);
-        } else {
-            res.status(404).json({ message: "Produto não encontrado" });
-        }
-    } catch(err) {
-        console.log(err);
-        res.status(500).json({ message: "Um erro aconteceu, tente de novo" });
-    }
-});
-
-// GET (busca por query)
-router.get("/produtos", async (req, res) => {
-    try {
-      const { nome, categoria } = req.query;
-      if (nome) {
-        const produtos = await Produto.findAll({
-            where: {
-                nome: {
-                  [Op.like]: `%${nome}%`
-                }
-              }
-        });
-        res.json(produtos);
-      } else if (categoria) {
-        const produtos = await Produto.findAll({
-          where: { categoria: categoria }
-        });
-        res.json(produtos);
+  try {
+      const { id } = req.params;
+      const produto = await Produto.findByPk(id);
+      if(produto) {
+          res.json(produto);
       } else {
-        res.status(404).json({ message: "Produto não encontrado" });
+          res.status(404).json({ message: "Produto não encontrado" });
       }
-    } catch (err) {
+  } catch(err) {
       console.log(err);
       res.status(500).json({ message: "Um erro aconteceu, tente de novo" });
-    }
-  });
+  }
+});
 
-// PUT
-// DELETE
+
 
 module.exports = router;
