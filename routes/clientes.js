@@ -31,6 +31,30 @@ router.get("/clientes/:id", async (req, res) => {
   }
 });
 
+//get retornando lista de pets para determinado cliente
+router.get("/clientes/:clienteId/pets", async (req, res) => {
+  try {
+    const cliente = await Cliente.findOne({
+      where: { id: req.params.clienteId },
+      attributes: ['nome'],
+      include: { model: Pet, attributes: ['nome'] }
+    });
+
+    if(cliente) {
+      if(cliente.pets.length > 0){
+        res.status(200).json(cliente);
+      } else{
+        res.status(404).json("Nenhum pet cadastrado nesse cliente.")
+      }
+
+    }else{
+      res.status(404).json("Cliente não encontrado.")
+    };
+  } catch (err) {
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
 //Get retornando um pdf com dados dos clientes
 router.get('/cliente/relatorio', async (req, res) => {
   try {
