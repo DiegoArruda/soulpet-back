@@ -23,10 +23,16 @@ const session = require("express-session");
 app.set("trust proxy", 1);
 app.use(
   session({
-    secret: "s3Cur3",
-    name: "sessionId",
+    secret: "s3gr3d0",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true },
   })
 );
+
+//Bunyan
+var bunyan = require("bunyan");
+var log = bunyan.createLogger({ name: "soulpet-app" });
 
 // Configurações de acesso
 app.use(cors({ origin: "http://localhost:3000" }));
@@ -35,21 +41,26 @@ app.use(cors({ origin: "http://localhost:3000" }));
 const { connection, authenticate } = require("./database/database");
 authenticate(connection); // efetivar a conexão
 
-mongoose.connect("mongodb+srv://gustavo:7f04dabcd@cluster0.5nv4xhx.mongodb.net/?retryWrites=true&w=majority")
-.then(() => console.log("banco de dados conectado"))
-.catch(() => console.log("Deu ruim"));
-app.use(morgan('combined', {
-  stream: {
-    write: async function (log) {
-      try {
-        const novoLog = new LogMorgan({ log });
-        await novoLog.save();
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  }
-}));
+mongoose
+  .connect(
+    "mongodb+srv://gustavo:7f04dabcd@cluster0.5nv4xhx.mongodb.net/?retryWrites=true&w=majority"
+  )
+  .then(() => log.info("banco de dados conectado"))
+  .catch(() => log.warn("Deu ruim"));
+app.use(
+  morgan("combined", {
+    stream: {
+      write: async function (log) {
+        try {
+          const novoLog = new LogMorgan({ log });
+          await novoLog.save();
+        } catch (err) {
+          console.err(err);
+        }
+      },
+    },
+  })
+);
 
 // Definição de Rotas
 const rotasClientes = require("./routes/clientes");
@@ -74,4 +85,3 @@ app.listen(3001, () => {
   // Force = apaga tudo e recria as tabelas
   connection.sync();
 });
- 
