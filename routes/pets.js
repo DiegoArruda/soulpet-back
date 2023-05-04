@@ -6,11 +6,37 @@ const { Router } = require("express");
 // Criar o grupo de rotas (/pets)
 const router = Router();
 
-// GET 
-// router.get("/pets", async (req, res) => {
-//   const listaPets = await Pet.findAll();
-//   res.json(listaPets);
-// });
+
+
+
+// POST
+router.post("/pets", async (req, res) => {
+  const { nome, tipo, porte, dataNasc, clienteId } = req.body;
+
+  try {
+    const cliente = await Cliente.findByPk(clienteId);
+    if (cliente) {
+      const pet = await Pet.create({ nome, tipo, porte, dataNasc, clienteId });
+      res.status(201).json(pet);
+    } else {
+      res.status(404).json({ message: "Cliente não encontrado." });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Um erro aconteceu." });
+  }
+});
+
+// GET BY ID
+router.get("/pets/:id", async (req, res) => {
+  const { id } = req.params;
+  const pet = await Pet.findByPk(id);
+  if (pet) {
+    res.json(pet);
+  } else {
+    res.status(404).json({ message: "Pet não encontrado." });
+  }
+});
 
 // GET (com paginação)
 router.get("/pets", async (req, res) => {
@@ -31,35 +57,7 @@ router.get("/pets", async (req, res) => {
   res.json({ listaPets, currentPage: page, totalPages });
 });
 
-
-// GET BY ID
-router.get("/pets/:id", async (req, res) => {
-  const { id } = req.params;
-  const pet = await Pet.findByPk(id);
-  if (pet) {
-    res.json(pet);
-  } else {
-    res.status(404).json({ message: "Pet não encontrado." });
-  }
-});
-
-router.post("/pets", async (req, res) => {
-  const { nome, tipo, porte, dataNasc, clienteId } = req.body;
-
-  try {
-    const cliente = await Cliente.findByPk(clienteId);
-    if (cliente) {
-      const pet = await Pet.create({ nome, tipo, porte, dataNasc, clienteId });
-      res.status(201).json(pet);
-    } else {
-      res.status(404).json({ message: "Cliente não encontrado." });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Um erro aconteceu." });
-  }
-});
-
+// PUT
 router.put("/pets/:id", async (req, res) => {
   // Esses são os dados que virão no corpo JSON
   const { nome, tipo, dataNasc, porte } = req.body;
@@ -90,6 +88,7 @@ router.put("/pets/:id", async (req, res) => {
   }
 });
 
+//DELETE
 router.delete("/pets/:id", async (req, res) => {
   // Precisamos checar se o pet existe antes de apagar
   const pet = await Pet.findByPk(req.params.id);
