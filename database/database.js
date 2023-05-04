@@ -15,15 +15,19 @@ const connection = new Sequelize(
   }
 );
 
+//Bunyan
+var bunyan = require("bunyan");
+var log = bunyan.createLogger({ name: "soulpet-app" });
+
 // Estabelecer conexão usando o objeto
 async function authenticate(connection) {
   try {
     // Tentar estabelecer conexão (usar as informações passadas acima)
     await connection.authenticate();
-    console.log("Conexão estabelecida com sucesso!");
+    log.info("Conexão estabelecida com sucesso!");
   } catch (err) {
     // err = objeto que guarda detalhes sobre o erro que aconteceu
-    console.log("Um erro inesperado aconteceu: ", err);
+    log.warn(err);
   }
 }
 
