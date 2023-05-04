@@ -6,14 +6,35 @@ const { Router } = require("express");
 // Criar o grupo de rotas (/pets)
 const router = Router();
 
+// GET 
+// router.get("/pets", async (req, res) => {
+//   const listaPets = await Pet.findAll();
+//   res.json(listaPets);
+// });
+
+// GET (com paginação)
 router.get("/pets", async (req, res) => {
-  const listaPets = await Pet.findAll();
-  res.json(listaPets);
+  const page = parseInt(req.query.page) || 1; 
+  const limit = parseInt(req.query.limit) || 10; 
+  const offset = (page - 1) * limit;
+
+  const { count, rows: listaPets } = await Pet.findAndCountAll({
+    limit,
+    offset,
+  });
+
+  const totalPages = Math.ceil(count / limit);
+
+  if (page > totalPages) {
+    return res.status(404).json({});
+  }
+  res.json({ listaPets, currentPage: page, totalPages });
 });
 
+
+// GET BY ID
 router.get("/pets/:id", async (req, res) => {
   const { id } = req.params;
-
   const pet = await Pet.findByPk(id);
   if (pet) {
     res.json(pet);
