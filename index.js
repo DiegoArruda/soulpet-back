@@ -3,6 +3,8 @@ const cors = require("cors");
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
+const LogMorgan = require("./model/LogMorgan");
+const mongoose = require("mongoose");
 
 // Configuração do App
 const app = express();
@@ -33,6 +35,22 @@ app.use(cors({ origin: "http://localhost:3000" }));
 const { connection, authenticate } = require("./database/database");
 authenticate(connection); // efetivar a conexão
 
+mongoose.connect("mongodb+srv://gustavo:7f04dabcd@cluster0.5nv4xhx.mongodb.net/?retryWrites=true&w=majority")
+.then(() => console.log("banco de dados conectado"))
+.catch(() => console.log("Deu ruim"));
+app.use(morgan('combined', {
+  stream: {
+    write: async function (log) {
+      try {
+        const novoLog = new LogMorgan({ log });
+        await novoLog.save();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+}));
+
 // Definição de Rotas
 const rotasClientes = require("./routes/clientes");
 const rotasPets = require("./routes/pets");
@@ -56,3 +74,4 @@ app.listen(3001, () => {
   // Force = apaga tudo e recria as tabelas
   connection.sync();
 });
+ 

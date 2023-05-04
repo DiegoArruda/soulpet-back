@@ -28,8 +28,9 @@ router.post("/pedidos", async (req, res) => {
     const listaPedidos = await Pedido.findAll( {include: [Cliente, Produto]});
     res.json(listaPedidos);
   });
-  
+
   router.get("/pedidos/:codigo", async (req, res) => {
+    
     const { codigo } = req.params;
   
     const pedidoId = await Pedido.findByPk(codigo, {include: [Cliente, Produto]});
@@ -38,6 +39,7 @@ router.post("/pedidos", async (req, res) => {
     } else {
       res.status(404).json({ message: "Pedido não encontrado." });
     }
+  
   });
   
   router.get("/pedidos/produtos/:id", async (req, res) => {
